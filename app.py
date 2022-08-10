@@ -1,23 +1,44 @@
 from flask import Flask, jsonify, request
-from star_data import data
+import csv
+
+all_articles = []
+with open('articles.csv', encoding='utf8') as f:
+    reader = csv.reader(f)
+    data = list(reader)
+    all_articles = data[1:]
+
+liked_articles = []
+disliked_articles = []
 
 app = Flask(__name__)
-@app.route('/')
-def index():
-    return jsonify({
-        'data': data,
-        'message': 'success'
-    }), 200
 
-@app.route('/star')
-def star():
-    name = request.args.get('name')
-    star_data = next((item for item in data if item['name'] == name), None)
+
+@app.route('/get-article')
+def get_article():
     return jsonify({
-        'data': star_data,
-        'message': 'success'
-    }), 200
+        'data': all_articles[0],
+        'status': 'success'
+    })
+
+
+@app.route('/liked-article', methods=['POST'])
+def liked_article():
+    article = all_articles[0]
+    all_articles = all_articles[1:]
+    liked_articles.append(article)
+    return jsonify({
+        'status': 'success'
+    }), 201
+
+
+@app.route('/disliked-article', methods=['POST'])
+def disliked_article():
+    article = all_articles[0]
+    all_articles = all_articles[1:]
+    disliked_articles.append(article)
+    return jsonify({
+        'status': 'success'
+    }), 201
 
 if __name__ == '__main__':
     app.run()
-
